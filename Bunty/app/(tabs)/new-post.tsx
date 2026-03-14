@@ -16,6 +16,7 @@ import { useAuth } from "../../src/context/AuthContext";
 import { uploadImage } from "../../src/services/storageService";
 import { createPost } from "../../src/services/postService";
 import { colors, spacing } from "../../src/styles/theme";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function NewPostScreen() {
   const { user } = useAuth();
@@ -77,7 +78,9 @@ export default function NewPostScreen() {
           <Image source={{ uri: image }} style={styles.preview} />
         ) : (
           <View style={styles.placeholder}>
-            <Text style={styles.placeholderIcon}>📷</Text>
+            <Text style={styles.placeholderIcon}>
+              <Ionicons name="camera" size={50} color="#2c2727" />
+            </Text>
             <Text style={styles.placeholderText}>Tap to select a photo</Text>
           </View>
         )}

@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import { colors } from "../../src/styles/theme";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   return (
@@ -24,9 +25,11 @@ export default function TabLayout() {
       <Tabs.Screen
         name="feed"
         options={{
-          title: "bunty",
-          tabBarLabel: "Home",
-          tabBarIcon: ({ color }) => <TabIcon emoji="🏠" color={color} />,
+          title: "Bunty",
+          tabBarLabel: "Feed",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="heart-outline" size={28} color="black" />
+          ),
         }}
       />
       <Tabs.Screen
@@ -34,7 +37,9 @@ export default function TabLayout() {
         options={{
           title: "Search",
           tabBarLabel: "Search",
-          tabBarIcon: ({ color }) => <TabIcon emoji="🔍" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="search-outline" size={28} color="black" />
+          ),
         }}
       />
       <Tabs.Screen
@@ -42,7 +47,9 @@ export default function TabLayout() {
         options={{
           title: "New Post",
           tabBarLabel: "Post",
-          tabBarIcon: ({ color }) => <TabIcon emoji="➕" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="add-circle-outline" size={28} color="black" />
+          ),
         }}
       />
       <Tabs.Screen
@@ -50,7 +57,9 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarLabel: "Profile",
-          tabBarIcon: ({ color }) => <TabIcon emoji="👤" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-circle-outline" size={28} color="black" />
+          ),
         }}
       />
     </Tabs>

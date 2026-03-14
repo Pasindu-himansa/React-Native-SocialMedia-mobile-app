@@ -6,6 +6,7 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import { User } from "../types";
+import { updateDoc } from "firebase/firestore";
 
 export const registerUser = async (
   email: string,
@@ -46,4 +47,11 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
     return snap.data() as User;
   }
   return null;
+};
+
+export const updateUserAvatar = async (
+  uid: string,
+  avatarUrl: string,
+): Promise<void> => {
+  await updateDoc(doc(db, "users", uid), { avatarUrl });
 };

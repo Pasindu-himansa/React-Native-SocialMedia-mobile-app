@@ -13,6 +13,7 @@ import PostCard from "../../src/components/PostCard";
 import { getFeedPosts } from "../../src/services/postService";
 import { Post } from "../../src/types";
 import { colors, spacing } from "../../src/styles/theme";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function FeedScreen() {
   const { user, loading: authLoading } = useAuth();
@@ -65,7 +66,10 @@ export default function FeedScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>No posts yet.</Text>
-        <Text style={styles.emptySubText}>Be the first to post! 📸</Text>
+        <Text style={styles.emptySubText}>
+          Be the first to post!
+          <Ionicons name="home" size={24} color="black" />
+        </Text>
       </View>
     );
   }

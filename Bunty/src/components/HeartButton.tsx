@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { TouchableOpacity, Text, StyleSheet, Animated } from "react-native";
 import { colors } from "../styles/theme";
+import { Ionicons } from "@expo/vector-icons";
 
 interface HeartButtonProps {
   liked: boolean;
@@ -31,7 +32,11 @@ const HeartButton = ({ liked, count, onPress }: HeartButtonProps) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <Animated.Text style={[styles.heart, { transform: [{ scale }] }]}>
-        {liked ? "❤️" : "🤍"}
+        {liked ? (
+          <Ionicons name="heart" size={24} color="red" />
+        ) : (
+          <Ionicons name="heart-outline" size={24} color="black" />
+        )}
       </Animated.Text>
       <Text style={styles.count}>{count}</Text>
     </TouchableOpacity>

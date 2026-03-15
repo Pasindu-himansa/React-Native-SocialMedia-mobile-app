@@ -51,8 +51,8 @@ export default function AuthScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View style={styles.inner}>
-          <Text style={styles.logo}>bunty</Text>
-          <Text style={styles.tagline}>share your moments</Text>
+          <Text style={styles.logo}>Bunty</Text>
+          <Text style={styles.tagline}>Just for you !</Text>
 
           {!isLogin && (
             <TextInput

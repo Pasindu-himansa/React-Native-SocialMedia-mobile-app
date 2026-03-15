@@ -15,6 +15,7 @@ import { formatDate } from "../utils/formatDate";
 import { Post } from "../types";
 import { toggleLike } from "../services/postService";
 import { useAuth } from "../context/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
 
 interface PostCardProps {
   post: Post;
@@ -64,7 +65,13 @@ const PostCard = ({ post, onLikeToggle }: PostCardProps) => {
           style={styles.commentBtn}
           onPress={() => router.push(`/post/${post.id}`)}
         >
-          <Text style={styles.commentIcon}>💬</Text>
+          <Text style={styles.commentIcon}>
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              size={24}
+              color="balck"
+            />
+          </Text>
           <Text style={styles.commentCount}>{post.commentCount}</Text>
         </TouchableOpacity>
       </View>

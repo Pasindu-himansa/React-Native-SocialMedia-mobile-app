@@ -1,5 +1,5 @@
-const CLOUD_NAME = "daeswtiof";
-const UPLOAD_PRESET = "bunty_uploads";
+const CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+const UPLOAD_PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
 export const uploadImage = async (imageUri: string): Promise<string> => {
   const formData = new FormData();

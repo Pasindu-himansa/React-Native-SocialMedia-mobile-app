@@ -43,5 +43,7 @@ app-example
 /android
 
 
-#firebase
-firebase.ts
+
+
+#env
+.env

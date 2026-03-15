@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
-import { colors } from "../../src/styles/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../../src/styles/theme";
 
 export default function TabLayout() {
   return (
@@ -26,9 +26,9 @@ export default function TabLayout() {
         name="feed"
         options={{
           title: "Bunty",
-          tabBarLabel: "Feed",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="heart-outline" size={28} color="black" />
+          tabBarLabel: "Pics",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="rose-sharp" size={size} color={color} />
           ),
         }}
       />
@@ -37,8 +37,8 @@ export default function TabLayout() {
         options={{
           title: "Search",
           tabBarLabel: "Search",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="search-outline" size={28} color="black" />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search" size={size} color={color} />
           ),
         }}
       />
@@ -47,8 +47,18 @@ export default function TabLayout() {
         options={{
           title: "New Post",
           tabBarLabel: "Post",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="add-circle-outline" size={28} color="black" />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="add-circle" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chats"
+        options={{
+          title: "Chats",
+          tabBarLabel: "Chats",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubble" size={size} color={color} />
           ),
         }}
       />
@@ -57,16 +67,11 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarLabel: "Profile",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person-circle-outline" size={28} color="black" />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-circle-outline" size={28} color={color} />
           ),
         }}
       />
     </Tabs>
   );
 }
-
-const TabIcon = ({ emoji, color }: { emoji: string; color: string }) => {
-  const { Text } = require("react-native");
-  return <Text style={{ fontSize: 20 }}>{emoji}</Text>;
-};

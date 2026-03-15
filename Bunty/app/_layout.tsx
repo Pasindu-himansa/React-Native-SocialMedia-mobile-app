@@ -23,6 +23,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="post/[id]" options={{ title: "Post" }} />
           <Stack.Screen name="user/[uid]" options={{ title: "Profile" }} />
+          <Stack.Screen name="chat/[uid]" options={{ title: "Chat" }} />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

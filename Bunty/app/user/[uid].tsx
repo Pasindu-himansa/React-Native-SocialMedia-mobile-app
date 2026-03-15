@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../../src/context/AuthContext";
 import {
   View,
   Text,
@@ -15,6 +16,7 @@ import { getUserProfile } from "../../src/services/authService";
 import { getUserPosts } from "../../src/services/postService";
 import { User, Post } from "../../src/types";
 import { colors, spacing } from "../../src/styles/theme";
+import { Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 const IMAGE_SIZE = width / 3;
@@ -25,6 +27,7 @@ export default function UserProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     const load = async () => {
@@ -65,7 +68,21 @@ export default function UserProfileScreen() {
       <View style={styles.header}>
         <Avatar uri={user.avatarUrl} username={user.username} size={72} />
         <View style={styles.headerInfo}>
-          <Text style={styles.username}>{user.username}</Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.username}>{user.username}</Text>
+            {currentUser?.uid !== uid && (
+              <TouchableOpacity
+                style={styles.messageBtn}
+                onPress={() => router.push(`/chat/${uid}`)}
+              >
+                <Ionicons
+                  name="chatbubble-ellipses"
+                  size={18}
+                  color={colors.white}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
           <Text style={styles.postCount}>
             {posts.length} {posts.length === 1 ? "post" : "posts"}
           </Text>
@@ -141,5 +158,19 @@ const styles = StyleSheet.create({
     height: IMAGE_SIZE,
     borderWidth: 1,
     borderColor: colors.white,
+  },
+
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  messageBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -158,9 +158,7 @@ export default function PostScreen() {
           }
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <Text style={styles.noComments}>
-              No comments yet. Be the first!
-            </Text>
+            <Text style={styles.noComments}>No comments yet</Text>
           }
           keyboardShouldPersistTaps="handled"
         />
@@ -237,6 +235,7 @@ const styles = StyleSheet.create({
   image: {
     width: width,
     height: width,
+    alignSelf: "center",
   },
   actions: {
     flexDirection: "row",

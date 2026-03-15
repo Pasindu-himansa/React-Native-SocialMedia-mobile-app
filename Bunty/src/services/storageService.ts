@@ -1,30 +1,44 @@
-const CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-const UPLOAD_PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
+const CLOUD_NAME = "daeswtiof";
+const UPLOAD_PRESET = "bunty_uploads";
 
 export const uploadImage = async (imageUri: string): Promise<string> => {
-  const formData = new FormData();
+  console.log("uploadImage called with:", imageUri);
+  console.log("CLOUD_NAME:", CLOUD_NAME);
+  console.log("UPLOAD_PRESET:", UPLOAD_PRESET);
 
-  formData.append("file", {
-    uri: imageUri,
-    type: "image/jpeg",
-    name: "photo.jpg",
-  } as any);
+  try {
+    const formData = new FormData();
 
-  formData.append("upload_preset", UPLOAD_PRESET);
+    formData.append("file", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: "photo.jpg",
+    } as any);
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    },
-  );
+    formData.append("upload_preset", UPLOAD_PRESET);
 
-  const data = await response.json();
+    console.log("Sending to Cloudinary...");
 
-  if (!data.secure_url) {
-    throw new Error("Image upload failed");
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+
+    console.log("Response status:", response.status);
+
+    const data = await response.json();
+    console.log("Cloudinary response:", JSON.stringify(data));
+
+    if (!data.secure_url) {
+      throw new Error(`Upload failed: ${JSON.stringify(data)}`);
+    }
+
+    return data.secure_url;
+  } catch (error) {
+    console.error("Upload error:", error);
+    throw error;
   }
-
-  return data.secure_url;
 };

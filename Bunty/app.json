@@ -24,15 +24,27 @@
       },
       "package": "com.pasindu.bunty",
       "usesCleartextTraffic": true,
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "plugins": [
       [
         "expo-image-picker",
         {
           "photosPermission": "Bunty needs access to your photos so you can share them."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#1A1A1A",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Bunty needs your location to tag your posts."
         }
       ]
     ],

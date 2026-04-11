@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Alert,
+  Vibration,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -21,6 +22,10 @@ import Avatar from "../../src/components/Avatar";
 import { Post } from "../../src/types";
 import { colors, spacing } from "../../src/styles/theme";
 import { Ionicons } from "@expo/vector-icons";
+import * as Notifications from "expo-notifications";
+import { useFocusEffect } from "expo-router";
+import { getDocs, collection, doc, setDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 
 const { width } = Dimensions.get("window");
 const IMAGE_SIZE = width / 3;
@@ -31,13 +36,16 @@ export default function ProfileScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [buzzedOnce, setBuzzedOnce] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
-    getUserPosts(user.uid)
-      .then(setPosts)
-      .finally(() => setLoading(false));
-  }, [user]);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!user) return;
+      getUserPosts(user.uid)
+        .then(setPosts)
+        .finally(() => setLoading(false));
+    }, [user]),
+  );
 
   const handleAvatarPress = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -51,6 +59,7 @@ export default function ProfileScreen() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
+      presentationStyle: ImagePicker.UIImagePickerPresentationStyle.FULL_SCREEN,
     });
 
     if (!result.canceled && user) {
@@ -63,6 +72,46 @@ export default function ProfileScreen() {
         Alert.alert("Error", error.message);
       } finally {
         setUploadingAvatar(false);
+      }
+    }
+  };
+
+  const buzzEveryone = async () => {
+    if (!user) return;
+    Vibration.vibrate(100);
+
+    if (!buzzedOnce) {
+      setBuzzedOnce(true);
+      setTimeout(() => setBuzzedOnce(false), 60000);
+
+      try {
+        // Write to Firestore for real-time vibration
+        await setDoc(doc(db, "buzz", "latest"), {
+          from: user.uid,
+          fromName: user.username,
+          timestamp: Date.now(),
+        });
+
+        // Send push notification as well
+        const usersSnap = await getDocs(collection(db, "users"));
+        const notifications = usersSnap.docs
+          .filter((d) => d.id !== user.uid && d.data().pushToken)
+          .map((d) =>
+            fetch("https://exp.host/--/api/v2/push/send", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                to: d.data().pushToken,
+                title: "Oya Bakoi!",
+                body: `Bultyyy delle guti`,
+                sound: "default",
+                priority: "high",
+              }),
+            }),
+          );
+        await Promise.all(notifications);
+      } catch (error: any) {
+        console.log("Buzz error:", error.message);
       }
     }
   };
@@ -110,6 +159,12 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
+        <TouchableOpacity style={styles.buzzBtn} onPress={buzzEveryone}>
+          <Text style={styles.buzzText}>
+            <Ionicons name="notifications" size={22} color="orange" />
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
@@ -130,7 +185,7 @@ export default function ProfileScreen() {
         </View>
       ) : (
         <FlatList
-          data={posts}
+          data={posts.filter((p) => p.imageUrl)}
           keyExtractor={(item) => item.id}
           numColumns={3}
           renderItem={({ item }) => (
@@ -232,5 +287,18 @@ const styles = StyleSheet.create({
     height: IMAGE_SIZE,
     borderWidth: 1,
     borderColor: colors.white,
+  },
+  buzzBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: spacing.md,
+  },
+  buzzText: {
+    fontSize: 18,
   },
 });

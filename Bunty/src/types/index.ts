@@ -12,7 +12,9 @@ export interface Post {
   username: string;
   avatarUrl?: string;
   imageUrl: string;
+  images?: string[];
   caption?: string;
+  location?: string;
   likes: string[];
   commentCount: number;
   createdAt: number;
@@ -26,4 +28,14 @@ export interface Comment {
   avatarUrl?: string;
   text: string;
   createdAt: number;
+}
+
+export interface Place {
+  id: string;
+  name: string;
+  notes?: string;
+  visited: boolean;
+  visitedDate?: string;
+  createdAt: number;
+  createdBy: string;
 }

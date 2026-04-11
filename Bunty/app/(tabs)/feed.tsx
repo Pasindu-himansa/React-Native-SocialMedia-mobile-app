@@ -14,6 +14,9 @@ import { getFeedPosts } from "../../src/services/postService";
 import { Post } from "../../src/types";
 import { colors, spacing } from "../../src/styles/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { updateUserAvatar } from "@/src/services/authService";
+import { useScrollToTop } from "@react-navigation/native";
+import { useRef } from "react";
 
 export default function FeedScreen() {
   const { user, loading: authLoading } = useAuth();
@@ -49,10 +52,18 @@ export default function FeedScreen() {
     loadPosts();
   }, []);
 
+  useEffect(() => {
+    if (user?.avatarUrl) {
+      updateUserAvatar(user.uid, user.avatarUrl);
+    }
+  }, [user]);
+
   const handleLikeToggle = async (postId: string) => {
     const updated = await getFeedPosts();
     setPosts(updated);
   };
+  const scrollRef = useRef<FlatList>(null);
+  useScrollToTop(scrollRef);
 
   if (loading) {
     return (
@@ -76,10 +87,19 @@ export default function FeedScreen() {
 
   return (
     <FlatList
+      ref={scrollRef}
       data={posts}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <PostCard post={item} onLikeToggle={handleLikeToggle} />
+        <PostCard
+          post={item}
+          onLikeToggle={handleLikeToggle}
+          onDelete={(postId) => setPosts(posts.filter((p) => p.id !== postId))}
+          onUpdate={async () => {
+            const updated = await getFeedPosts();
+            setPosts(updated);
+          }}
+        />
       )}
       style={styles.list}
       refreshControl={

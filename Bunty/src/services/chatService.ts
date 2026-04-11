@@ -11,6 +11,8 @@ import {
   serverTimestamp,
   where,
   getDocs,
+  startAfter,
+  limit,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -70,6 +72,7 @@ export const createOrGetChat = async (
 export const sendMessage = async (
   chatId: string,
   senderId: string,
+  senderName: string,
   text: string,
   otherUid: string,
 ): Promise<void> => {
@@ -84,6 +87,29 @@ export const sendMessage = async (
     lastMessageAt: Date.now(),
     unreadBy: [otherUid],
   });
+
+  // Send push notification to other user
+  try {
+    const otherUserSnap = await getDoc(doc(db, "users", otherUid));
+    if (otherUserSnap.exists()) {
+      const otherUser = otherUserSnap.data();
+      if (otherUser.pushToken) {
+        await fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: otherUser.pushToken,
+            title: senderName,
+            body: text,
+            sound: "default",
+            priority: "high",
+          }),
+        });
+      }
+    }
+  } catch (error) {
+    console.log("Notification error:", error);
+  }
 };
 
 export const subscribeToMessages = (
@@ -92,16 +118,36 @@ export const subscribeToMessages = (
 ) => {
   const q = query(
     collection(db, "chats", chatId, "messages"),
-    orderBy("createdAt", "asc"),
+    orderBy("createdAt", "desc"),
+    limit(20),
   );
 
   return onSnapshot(q, (snap) => {
-    const messages = snap.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    })) as Message[];
+    const messages = snap.docs
+      .map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }))
+      .reverse() as Message[];
     callback(messages);
   });
+};
+
+export const loadOlderMessages = async (
+  chatId: string,
+  oldestTimestamp: number,
+): Promise<Message[]> => {
+  const q = query(
+    collection(db, "chats", chatId, "messages"),
+    orderBy("createdAt", "desc"),
+    startAfter(oldestTimestamp),
+    limit(20),
+  );
+
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .reverse() as Message[];
 };
 
 export const subscribeToChats = (

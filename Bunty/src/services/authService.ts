@@ -7,6 +7,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import { User } from "../types";
 import { updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 export const registerUser = async (
   email: string,
@@ -53,5 +54,27 @@ export const updateUserAvatar = async (
   uid: string,
   avatarUrl: string,
 ): Promise<void> => {
+  // Update user profile
   await updateDoc(doc(db, "users", uid), { avatarUrl });
+
+  // Update all posts by this user
+  const postsQuery = query(collection(db, "posts"), where("userId", "==", uid));
+  const postsSnap = await getDocs(postsQuery);
+  const updatePromises = postsSnap.docs.map((d) =>
+    updateDoc(doc(db, "posts", d.id), { avatarUrl }),
+  );
+  await Promise.all(updatePromises);
+
+  // Update all chats by this user
+  const chatsQuery = query(
+    collection(db, "chats"),
+    where("participants", "array-contains", uid),
+  );
+  const chatsSnap = await getDocs(chatsQuery);
+  const chatUpdatePromises = chatsSnap.docs.map((d) =>
+    updateDoc(doc(db, "chats", d.id), {
+      [`participantAvatars.${uid}`]: avatarUrl,
+    }),
+  );
+  await Promise.all(chatUpdatePromises);
 };

@@ -1,6 +1,20 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../src/styles/theme";
+import { TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
+
+function SearchButton() {
+  const router = useRouter();
+  return (
+    <TouchableOpacity
+      onPress={() => router.push("/search")}
+      style={{ marginRight: 16 }}
+    >
+      <Ionicons name="search-outline" size={22} color={colors.text} />
+    </TouchableOpacity>
+  );
+}
 
 export default function TabLayout() {
   return (
@@ -20,25 +34,26 @@ export default function TabLayout() {
           fontSize: 18,
         },
         headerShadowVisible: false,
+        headerRight: () => <SearchButton />,
       }}
     >
       <Tabs.Screen
         name="feed"
         options={{
           title: "Bunty",
-          tabBarLabel: "Pics",
+          tabBarLabel: "Clix",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="rose-sharp" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="hangouts"
         options={{
-          title: "Search",
-          tabBarLabel: "Search",
+          title: "Hangouts",
+          tabBarLabel: "Outs",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
+            <Ionicons name="map" size={size} color={color} />
           ),
         }}
       />
@@ -68,8 +83,18 @@ export default function TabLayout() {
           title: "Profile",
           tabBarLabel: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle-outline" size={28} color={color} />
+            <Ionicons
+              name="person-circle-outline"
+              size={size + 2}
+              color={color}
+            />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

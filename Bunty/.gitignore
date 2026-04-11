@@ -42,7 +42,13 @@ app-example
 /ios
 /android
 
+# Firebase
 
+google-services.json
+
+# Android build
+android/app/build/
+android/.gradle
 
 
 #env

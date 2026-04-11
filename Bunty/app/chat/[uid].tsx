@@ -20,6 +20,7 @@ import {
   sendMessage,
   subscribeToMessages,
   markAsRead,
+  loadOlderMessages,
   Message,
 } from "../../src/services/chatService";
 import { getUserProfile } from "../../src/services/authService";
@@ -37,6 +38,8 @@ export default function ChatScreen() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -73,19 +76,46 @@ export default function ChatScreen() {
     const unsubscribe = subscribeToMessages(chatId, (msgs) => {
       setMessages(msgs);
       setTimeout(
-        () => flatListRef.current?.scrollToEnd({ animated: true }),
-        100,
+        () => flatListRef.current?.scrollToEnd({ animated: false }),
+        300,
       );
     });
     return unsubscribe;
   }, [chatId]);
 
+  const handleLoadOlder = async () => {
+    if (!chatId || messages.length === 0 || loadingOlder || !hasMore) return;
+    setLoadingOlder(true);
+    try {
+      const oldest = messages[0].createdAt;
+      const older = await loadOlderMessages(chatId, oldest);
+      if (older.length < 10) setHasMore(false);
+      if (older.length > 0) {
+        setMessages([...older, ...messages]);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingOlder(false);
+    }
+  };
+
   const handleSend = async () => {
     if (!text.trim() || !chatId || !user || !otherUser) return;
     setSending(true);
     try {
-      await sendMessage(chatId, user.uid, text.trim(), otherUser.uid);
+      await sendMessage(
+        chatId,
+        user.uid,
+        user.username,
+        text.trim(),
+        otherUser.uid,
+      );
       setText("");
+      setTimeout(
+        () => flatListRef.current?.scrollToEnd({ animated: true }),
+        100,
+      );
     } catch (error: any) {
       Alert.alert("Error", error.message);
     } finally {
@@ -113,8 +143,27 @@ export default function ChatScreen() {
           data={messages}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.messageList}
+          onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
           onContentSizeChange={() =>
             flatListRef.current?.scrollToEnd({ animated: false })
+          }
+          ListHeaderComponent={
+            hasMore ? (
+              <TouchableOpacity
+                style={styles.loadMoreBtn}
+                onPress={handleLoadOlder}
+                disabled={loadingOlder}
+              >
+                {loadingOlder ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={colors.textSecondary}
+                  />
+                ) : (
+                  <Text style={styles.loadMoreText}>Load older messages</Text>
+                )}
+              </TouchableOpacity>
+            ) : null
           }
           ListEmptyComponent={
             <View style={styles.emptyChat}>
@@ -214,6 +263,15 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: spacing.sm,
     flexGrow: 1,
+  },
+  loadMoreBtn: {
+    alignItems: "center",
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  loadMoreText: {
+    fontSize: 13,
+    color: colors.textSecondary,
   },
   emptyChat: {
     flex: 1,

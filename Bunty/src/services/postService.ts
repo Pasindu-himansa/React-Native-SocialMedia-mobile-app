@@ -5,6 +5,7 @@ import {
   getDoc,
   doc,
   updateDoc,
+  deleteDoc,
   arrayUnion,
   arrayRemove,
   query,
@@ -21,17 +22,46 @@ export const createPost = async (
   imageUrl: string,
   caption: string,
   avatarUrl?: string,
+  location?: string,
+  images?: string[],
 ): Promise<void> => {
   await addDoc(collection(db, "posts"), {
     userId,
     username,
     avatarUrl: avatarUrl || null,
     imageUrl,
+    images: images || [imageUrl],
     caption,
+    location: location || null,
     likes: [],
     commentCount: 0,
     createdAt: Date.now(),
   });
+
+  // Notify all users about new post
+  try {
+    const usersSnap = await getDocs(collection(db, "users"));
+    const notifications = usersSnap.docs
+      .filter((d) => d.id !== userId && d.data().pushToken)
+      .map((d) =>
+        fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: d.data().pushToken,
+            title: username,
+            body: caption
+              ? `${username} posted: ${caption}`
+              : `${username} shared a new photo 📸`,
+            sound: "default",
+            priority: "high",
+          }),
+        }),
+      );
+    await Promise.all(notifications);
+  } catch (error) {
+    console.log("Notification error:", error);
+  }
 };
 
 export const getFeedPosts = async (): Promise<Post[]> => {
@@ -105,4 +135,18 @@ export const getComments = async (postId: string): Promise<Comment[]> => {
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Comment);
+};
+
+export const updatePost = async (
+  postId: string,
+  data: { caption?: string; location?: string },
+): Promise<void> => {
+  await updateDoc(doc(db, "posts", postId), data);
+};
+
+export const deletePost = async (postId: string): Promise<void> => {
+  await updateDoc(doc(db, "posts", postId), { deleted: true });
+  // Delete the document
+  const { deleteDoc } = await import("firebase/firestore");
+  await deleteDoc(doc(db, "posts", postId));
 };
